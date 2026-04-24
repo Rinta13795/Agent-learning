@@ -21,11 +21,13 @@ agentic search
 
 
 要学习Context Engineering
+
+
+
+**Sota版本的意思是> 当前这个领域“最强 / 最先进”的水平————拿我目前的AI举例就是：最好的模型。
+
+
 问题
-1
-Sota版本是什么意思
-2
-sandbox是什么？？
 
 3
 看小龙虾，看记忆管理+上下文管理
@@ -33,8 +35,9 @@ sandbox是什么？？
 4
 感觉function call还有好多其他的东西要学习
 
-5
-the workflow design patterns和
+**感悟：
 
-## ReAct Pattern
-什么关系？？
+1
+
+学习Agent项目方式：（这是一个idea）
+![](images/img_2604192334.png)
