@@ -182,3 +182,76 @@ prompt = PromptTemplate(
 4. parser.parse(output)
    → Joke(setup="...", punchline="...")
 ```
+
+### 6. Embeddings
+
+![](images/img_2604241132.png)
+
+
+问题：
+1
+高效做“近似最近邻搜索”（ANN
+感觉好高级
+
+2
+  
+
+- `db.as_retriever(search_type, search_kwargs)` — 把 VectorStore 转成 Retriever
+
+- `MultiQueryRetriever.from_llm(retriever, llm)` — 多查询检索器
+
+- `ContextualCompressionRetriever(base_compressor, base_retriever)` — 压缩检索器
+
+- `LLMChainExtractor.from_llm(llm)` — LLM 压缩器
+
+- `BM25Retriever.from_documents(documents)` — BM25 检索器
+
+- `EnsembleRetriever(retrievers, weights)` — 混合检索器
+
+高级
+
+
+**想法：
+  
+我觉得
+
+** 高级 Retriever
+**是什么**：
+
+更复杂的检索策略：MultiVector（摘要/假设问题检索）、ParentDocument（子块检索返回父文档）、SelfQuery（元数据过滤）。
+
+**为什么需要它**：
+
+基础检索有局限：
+
+- 用户问题和文档表述可能完全不同（问题是"怎么做"，文档是"步骤"）
+
+- 检索到的小块可能上下文不足
+
+- 文档有结构化信息（时间、类别），但普通检索用不上
+
+在后面的agent用得上
+
+
+
+**MultiVectorRetriever 的假设问题检索和摘要检索区别和使用
+
+**摘要检索：
+做法：
+文档 → LLM总结 → embedding
+查询：
+query → embedding → 和“总结”比
+
+
+**假设问题检索：（模拟询问）
+做法：
+文档 → LLM生成“可能被问的问题” → embedding
+查询：
+query → embedding → 和“这些问题”比
+
+**真正使用是混合使用（在Agent里面使用合适的，匹配精确度更高）：   
+
+模糊、口语、各种表达使用Hypothetical Questions
+
+结构化、专业术语使用Summary
+

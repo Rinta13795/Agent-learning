@@ -8,12 +8,6 @@
 
 
 
-## # [向量存储和检索器](https://langchain.ichuangpai.com/langchain/tutorial/Vector-stores-and-retrievers.html#%E5%90%91%E9%87%8F%E5%AD%98%E5%82%A8%E5%92%8C%E6%A3%80%E7%B4%A2%E5%99%A8)
-
-
-
-
-### [Retrievers](https://langchain.ichuangpai.com/langchain/tutorial/Vector-stores-and-retrievers.html#retrievers)
 
 
 问题：
