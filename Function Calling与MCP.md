@@ -7,17 +7,6 @@
 
 **架构：**
 
-**基于提示词的Function Calling：**
-
-![](images/img_2604101007.png)
-
-
-**基于API的Function Calling**：
- ![](images/img_2604101008-1.png)
-
-![](images/img_2604100958.png)
-
-
 ## MCP
 ### 知识
 
@@ -163,15 +152,111 @@ HTTP协议：
 ### MCP
 
 **问题：
+1
+导包本质是不是csapp里面的链式调用问题
+
+2
+为什么需要通道，不同地方定义不同
+
+
+自动完成调用+获取工具描述如果后端写的话，就需写很多代码是吧，加上不同AI应用迁移困难+拓展麻烦（因为需要再写代码），我现在没看MCP，但是我猜就是可以AI应用后端加入LLM自己去tool_calling，就是用LLM+tool_calling带后端逻辑替代原来所有后端的代码逻辑，需要获取工具信息的时候，就去tool_calling工具服务，需要执行就继续tool_calling API的服务（这里面还有就是本地服务和外部服务就是了，还有分就是这样代码确实整体实现了，但MCP好像封装了这些东西，怎么样封装的）。
+
+但是现实：
+
+LLM（决策）
+   ↓
+MCP Client Runtime
+   ↓
+协议通信
+   ↓
+Tool Server
+
+3
 
 **逻辑
 
 ![](images/img_2604091813.png)
 要实现的内容
 
+4
+- **MCP Client**：一个组件，用于维护与 MCP 服务器的连接，并从 MCP 服务器获取上下文，供 MCP 主机使用
+
+这个获取上下文是什么意思
+
+5
+从而保持MCP客户端与MCP服务器的一对一关系。
+为什么要始终保持一对一？
+
+6
+### HTTP + SSE 传输（旧方案，2024.10）
+
+> 客户端通过 HTTP POST 向服务端发请求，服务端通过 SSE 通道返回响应结果。
+
+- **SSE**（Server-Sent Events服务器发送事件），是一种**服务器单向推送数据给客户端**的技术，基于 **HTTP 协议。**
+    
+- 基本原理
+    
+    - 客户端先向服务端发起一个普通的 **HTTP 请求**。
+        
+    - 服务端保持这个连接**不断开**，以 `text/event-stream` 作为响应类型，源源不断地往里写数据。
+        
+    - 客户端收到数据后会触发相应的事件回调（比如浏览器前端实时更新界面）。
+        
+- 和普通 HTTP 的核心差异
+    
+    - 支持服务端**主动、流式**地推送消息
+        
+
+为什么在这么多远程服务调用的协议中选了 HTTP + SSE？
+
+- 服务端推送的必要性：MCP Server 中的工具发生了更新，需要主动向 MCP Client 推送通知
+    
+
+> **Why Notifications Matter**
+> 
+> This notification system is crucial for several reasons:
+> 
+> 1. Dynamic Environments: Tools may come and go based on server state, external dependencies, or user permissions
+>     
+> 2. Efficiency: Clients don’t need to poll for changes; they’re notified when updates occur
+>     
+> 3. Consistency: Ensures clients always have accurate information about available server capabilities
+>     
+> 4. Real-time Collaboration: Enables responsive AI applications that can adapt to changing contexts
+>     
+> 
+> This notification pattern extends beyond tools to other MCP primitives, enabling comprehensive real-time synchronization between clients and servers. [[4]](https://modelcontextprotocol.io/docs/learn/architecture)
+
+### Streamable HTTP 传输（新方案，2025.03）
+
+> HTTP + SSE 传输方案的升级版，目前正在逐步取代原有的 HTTP + SSE 传输方案
+
+- **Streamable HTTP** 并不是一个标准协议名，而是一个通用描述，指的是**基于 HTTP 协议的“可流式传输”技术**。它的核心思想是：在一个 HTTP 连接里，服务端可以**持续不断地发送数据**给客户端，客户端边接收边处理，类似“流”一样。与传统 HTTP 请求响应“一次性完成”不同，Streamable HTTP 保持连接不关闭，数据分片持续传输。常见实现方式包括：
+    
+    - HTTP/1.1 长连接 + 分块传输编码（Chunked Transfer Encoding）
+        
+    - HTTP/2 流式数据
+        
+    - HTTP/3 QUIC 流式传输
+        
+
+为什么 HTTP + SSE 要升级成 Streamable HTTP ？
 
 
+HTTP + SSE不也支持服务器主动，流式推送数据。
 
+7
+
+HTTP要学啊
+
+
+8
+我想知道抽象到HTTP是为什么，本来直接调用API，会有什么问题，这样抽象
+
+
+9
+![](images/img_2605080038.png)
+为什么不用比如说流还有随时更新？
 需完成：
 1
 HTTP有时间就写
@@ -325,3 +410,16 @@ server.run()
 4. 用户界面（如果有UI的话）
 
 **管道是操作系统在内核空间维护的缓冲区
+
+
+
+
+MCP里面-本地进程间通信， stdio 是接口，管道是连接这接口的通道。
+
+Stdio 传输，就是通过**标准输入**和**标准输出**这两个数据流来传输数据、通过管道来连接两个进程的**标准输入/输出接口**，使得一个进程的输出直接传给另一个进程输入，实现进程间数据传输
+
+
+
+![](images/img_2605072310.png)
+
+好有意思的图，很通俗易懂
